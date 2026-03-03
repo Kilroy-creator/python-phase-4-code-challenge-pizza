@@ -27,3 +27,54 @@ def index():
 
 if __name__ == "__main__":
     app.run(port=5555, debug=True)
+
+@app.route("/restaurants")
+def get_restaurants():    
+    restaurants = Restaurant.query.all()
+    return [ r.to_dict(only=["id", "name", "address"]) for r in restaurants ], 200
+@app.delete('/restaurants/<int:id>')
+def delete_restaurant(id):
+    restaurant = Restaurant.query.get(id)
+
+    if not restaurant:
+        return {"error": "Restaurant not found"}, 404
+
+    db.session.delete(restaurant)
+    db.session.commit()
+
+    return "", 204
+@app.route("/pizzas")
+def get_pizzas():
+    pizzas = Pizza.query.all()
+    return [ p.to_dict(only=["id", "name", "ingredients"]) for p in pizzas ], 200
+@app.post('/restaurant_pizzas')
+def create_restaurant_pizza():
+    data = request.get_json()
+
+    try:
+        rp = RestaurantPizza(
+            price=data['price'],
+            pizza_id=data['pizza_id'],
+            restaurant_id=data['restaurant_id']
+        )
+
+        db.session.add(rp)
+        db.session.commit()
+
+        return {
+            "id": rp.id,
+            "price": rp.price,
+            "pizza_id": rp.pizza_id,
+            "restaurant_id": rp.restaurant_id,
+            "pizza": {
+                "id": rp.pizza.id,
+                "name": rp.pizza.name,
+                "ingredients": rp.pizza.ingredients
+            }
+        }, 201
+
+    except Exception:
+        return {"errors": ["validation errors"]}, 400
+
+    except Exception:
+        return {"errors": ["validation errors"]}, 400
