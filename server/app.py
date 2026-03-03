@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+
 from models import db, Restaurant, RestaurantPizza, Pizza
 from flask_migrate import Migrate
 from flask import Flask, request
@@ -34,7 +34,7 @@ def get_restaurant_by_id(id):
     restaurant = Restaurant.query.get(id)
     if not restaurant:
         return {"error": "Restaurant not found"}, 404
-    # Override the default serialize_rule that hides restaurant_pizzas
+    
     data = restaurant.to_dict(rules=("-restaurant_pizzas.restaurant",))
     return data, 200
 
